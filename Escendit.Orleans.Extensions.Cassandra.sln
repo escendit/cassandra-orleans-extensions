@@ -1,0 +1,86 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BE03B4BC-8D74-42CA-81AC-014417FCFEB9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F719A264-551D-450A-9FBF-F3802858FFAE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clustering", "Clustering", "{5F161A73-5C42-4602-AB22-16EB85DEC048}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AspNetCore", "AspNetCore", "{FED9F72C-209F-4539-B7C0-730DE379B1BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reminders", "Reminders", "{77E5F3C7-A347-42F4-BF93-51248B035D56}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{2950C6B5-E391-4569-AAB5-D8BEB92FF7B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.AspNetCore.Builder.Orleans.Clustering.Cassandra", "src\AspNetCore\Clustering\Escendit.AspNetCore.Builder.Orleans.Clustering.Cassandra.csproj", "{5B3BE032-E088-4FB8-A5AC-5BC0BF40F14A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.AspNetCore.Builder.Orleans.Persistence.Cassandra", "src\AspNetCore\Persistence\Escendit.AspNetCore.Builder.Orleans.Persistence.Cassandra.csproj", "{68EE25C3-8397-4668-8DCB-971DF2430266}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.AspNetCore.Builder.Reminders.Cassandra", "src\AspNetCore\Reminders\Escendit.AspNetCore.Builder.Reminders.Cassandra.csproj", "{648DA3BD-AF58-430F-8231-0E4D76BA19E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.Orleans.Clustering.Cassandra", "src\Clustering\Cassandra\Escendit.Orleans.Clustering.Cassandra.csproj", "{D1643CDC-E454-441C-86D9-81207E8A0707}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.Orleans.Persistence.Cassandra", "src\Persistence\Cassandra\Escendit.Orleans.Persistence.Cassandra.csproj", "{C7BF8816-1982-4672-9ADB-55B2CC73C63B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.Orleans.Reminders.Cassandra", "src\Reminders\Cassandra\Escendit.Orleans.Reminders.Cassandra.csproj", "{6E3EEC03-C465-4C7F-93FB-E62A2ECC6847}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{9DC8501A-84DE-4272-A660-6615DA7C91B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.Orleans.Persistence.Cassandra.Tests", "test\Persistence\Cassandra\Escendit.Orleans.Persistence.Cassandra.Tests.csproj", "{7D40168C-40B6-4339-88A0-4F6E408F2EE7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5F161A73-5C42-4602-AB22-16EB85DEC048} = {BE03B4BC-8D74-42CA-81AC-014417FCFEB9}
+		{FED9F72C-209F-4539-B7C0-730DE379B1BF} = {BE03B4BC-8D74-42CA-81AC-014417FCFEB9}
+		{77E5F3C7-A347-42F4-BF93-51248B035D56} = {BE03B4BC-8D74-42CA-81AC-014417FCFEB9}
+		{2950C6B5-E391-4569-AAB5-D8BEB92FF7B8} = {BE03B4BC-8D74-42CA-81AC-014417FCFEB9}
+		{5B3BE032-E088-4FB8-A5AC-5BC0BF40F14A} = {FED9F72C-209F-4539-B7C0-730DE379B1BF}
+		{68EE25C3-8397-4668-8DCB-971DF2430266} = {FED9F72C-209F-4539-B7C0-730DE379B1BF}
+		{648DA3BD-AF58-430F-8231-0E4D76BA19E4} = {FED9F72C-209F-4539-B7C0-730DE379B1BF}
+		{D1643CDC-E454-441C-86D9-81207E8A0707} = {5F161A73-5C42-4602-AB22-16EB85DEC048}
+		{C7BF8816-1982-4672-9ADB-55B2CC73C63B} = {2950C6B5-E391-4569-AAB5-D8BEB92FF7B8}
+		{6E3EEC03-C465-4C7F-93FB-E62A2ECC6847} = {77E5F3C7-A347-42F4-BF93-51248B035D56}
+		{9DC8501A-84DE-4272-A660-6615DA7C91B0} = {F719A264-551D-450A-9FBF-F3802858FFAE}
+		{7D40168C-40B6-4339-88A0-4F6E408F2EE7} = {9DC8501A-84DE-4272-A660-6615DA7C91B0}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B3BE032-E088-4FB8-A5AC-5BC0BF40F14A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B3BE032-E088-4FB8-A5AC-5BC0BF40F14A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B3BE032-E088-4FB8-A5AC-5BC0BF40F14A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B3BE032-E088-4FB8-A5AC-5BC0BF40F14A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68EE25C3-8397-4668-8DCB-971DF2430266}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68EE25C3-8397-4668-8DCB-971DF2430266}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68EE25C3-8397-4668-8DCB-971DF2430266}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68EE25C3-8397-4668-8DCB-971DF2430266}.Release|Any CPU.Build.0 = Release|Any CPU
+		{648DA3BD-AF58-430F-8231-0E4D76BA19E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{648DA3BD-AF58-430F-8231-0E4D76BA19E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{648DA3BD-AF58-430F-8231-0E4D76BA19E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{648DA3BD-AF58-430F-8231-0E4D76BA19E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1643CDC-E454-441C-86D9-81207E8A0707}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1643CDC-E454-441C-86D9-81207E8A0707}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1643CDC-E454-441C-86D9-81207E8A0707}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1643CDC-E454-441C-86D9-81207E8A0707}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7BF8816-1982-4672-9ADB-55B2CC73C63B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7BF8816-1982-4672-9ADB-55B2CC73C63B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7BF8816-1982-4672-9ADB-55B2CC73C63B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7BF8816-1982-4672-9ADB-55B2CC73C63B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E3EEC03-C465-4C7F-93FB-E62A2ECC6847}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E3EEC03-C465-4C7F-93FB-E62A2ECC6847}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E3EEC03-C465-4C7F-93FB-E62A2ECC6847}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E3EEC03-C465-4C7F-93FB-E62A2ECC6847}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D40168C-40B6-4339-88A0-4F6E408F2EE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D40168C-40B6-4339-88A0-4F6E408F2EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D40168C-40B6-4339-88A0-4F6E408F2EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D40168C-40B6-4339-88A0-4F6E408F2EE7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
