@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <PackageReference Include="Escendit.Extensions.Hosting.Cassandra" />
+        <PackageReference Include="Microsoft.Orleans.Runtime"/>
+    </ItemGroup>
+</Project>
