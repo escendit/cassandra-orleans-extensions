@@ -1,5 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
-        <PackageReference Include="Microsoft.Orleans.Core"/>
+        <PackageReference Include="Escendit.Extensions.DependencyInjection.Cassandra"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Migrations\"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Remove="Resources\SQL\1_SuspectTime.sql"/>
+        <EmbeddedResource Include="Resources\SQL\1_SuspectTime.sql"/>
+        <None Remove="Resources\SQL\2_Silo.sql"/>
+        <EmbeddedResource Include="Resources\SQL\2_Silo.sql"/>
+        <None Remove="Resources\SQL\3_Membership.sql"/>
+        <EmbeddedResource Include="Resources\SQL\3_Membership.sql"/>
     </ItemGroup>
 </Project>
