@@ -7,6 +7,7 @@ using Escendit.Orleans.Clustering.Cassandra;
 using Escendit.Orleans.Clustering.Cassandra.Options;
 using Options;
 using Orleans;
+using Orleans.Messaging;
 
 /// <summary>
 /// Service Collection Extensions.
@@ -41,8 +42,7 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configureOptions);
         configureOptions.Invoke(services.AddOptions<CassandraClusteringOptions>());
         return services
-            .AddSingleton<IMembershipTable>(serviceProvider =>
-                new CassandraMembershipTable(
-                    serviceProvider, serviceProvider.GetRequiredService<IOptions<CassandraClusteringOptions>>().Value));
+            .AddSingleton<IGatewayListProvider, CassandraGatewayListProvider>()
+            .AddSingleton<IMembershipTable, CassandraMembershipTable>();
     }
 }
