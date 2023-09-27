@@ -4,7 +4,9 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="CassandraCSharpDriver" Version="3.19.3" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+    <PackageVersion Include="Escendit.Extensions.DependencyInjection.Cassandra" Version="0.1.0-rc.90" />
     <PackageVersion Include="Escendit.Extensions.Hosting.Cassandra" Version="0.1.0-rc.90" />
     <PackageVersion Include="Escendit.Tools.Branding" Version="1.0.2" />
     <PackageVersion Include="Escendit.Tools.CodeAnalysis.NetAnalyzers" Version="0.5.0" />
