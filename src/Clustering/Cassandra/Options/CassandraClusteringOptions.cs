@@ -3,6 +3,8 @@
 
 namespace Escendit.Orleans.Clustering.Cassandra.Options;
 
+using global::Orleans.Messaging;
+
 /// <summary>
 /// Cassandra Clustering Options.
 /// </summary>
@@ -13,4 +15,11 @@ public record CassandraClusteringOptions
     /// </summary>
     /// <value>The client name.</value>
     public string? ClientName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the max staleness.
+    /// </summary>
+    /// <value>The maximum staleness period.</value>
+    /// <seealso cref="IGatewayListProvider.MaxStaleness"/>
+    public TimeSpan MaxStaleness { get; set; }
 }
