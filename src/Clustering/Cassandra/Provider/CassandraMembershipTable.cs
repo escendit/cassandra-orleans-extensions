@@ -36,13 +36,13 @@ internal sealed class CassandraMembershipTable : IMembershipTable, IDisposable
     /// <param name="options">The options.</param>
     public CassandraMembershipTable(
         IServiceProvider serviceProvider,
-        CassandraClusteringOptions options)
+        IOptions<CassandraClusteringOptions> options)
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
         ArgumentNullException.ThrowIfNull(options);
         _clusterOptions = serviceProvider.GetRequiredService<IOptions<ClusterOptions>>().Value;
-        _cluster = serviceProvider.GetRequiredServiceByName<ICluster>(options.ClientName);
-        _clientOptions = serviceProvider.GetOptionsByName<CassandraClientOptions>(options.ClientName);
+        _cluster = serviceProvider.GetRequiredServiceByName<ICluster>(options.Value.ClientName);
+        _clientOptions = serviceProvider.GetOptionsByName<CassandraClientOptions>(options.Value.ClientName);
         _selfAssembly = Assembly.GetAssembly(typeof(CassandraMembershipTable))!;
     }
 
