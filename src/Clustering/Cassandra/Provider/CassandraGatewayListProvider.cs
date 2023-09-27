@@ -3,22 +3,36 @@
 
 namespace Escendit.Orleans.Clustering.Cassandra;
 
+using global::Orleans;
 using global::Orleans.Messaging;
+using global::Orleans.Runtime;
+using Microsoft.Extensions.Options;
+using Options;
 
 /// <summary>
 /// Cassandra Gateway List Provider.
 /// </summary>
 public class CassandraGatewayListProvider : IGatewayListProvider
 {
+    private readonly IMembershipTable _membershipTable;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CassandraGatewayListProvider"/> class.
     /// </summary>
-    public CassandraGatewayListProvider()
+    /// <param name="membershipTable">The membership table.</param>
+    /// <param name="options">The options.</param>
+    public CassandraGatewayListProvider(
+        IMembershipTable membershipTable,
+        IOptions<CassandraClusteringOptions> options)
     {
+        ArgumentNullException.ThrowIfNull(membershipTable);
+        ArgumentNullException.ThrowIfNull(options);
+        _membershipTable = membershipTable;
+        MaxStaleness = options.Value.MaxStaleness;
     }
 
     /// <inheritdoc/>
-    public TimeSpan MaxStaleness { get; } = TimeSpan.Zero;
+    public TimeSpan MaxStaleness { get; }
 
     /// <inheritdoc/>
     public bool IsUpdatable { get; } = true;
@@ -26,12 +40,19 @@ public class CassandraGatewayListProvider : IGatewayListProvider
     /// <inheritdoc/>
     public Task InitializeGatewayListProvider()
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
-    public Task<IList<Uri>> GetGateways()
+    public async Task<IList<Uri>> GetGateways()
     {
-        throw new NotImplementedException();
+        var membershipTableData = await _membershipTable.ReadAll();
+        return membershipTableData
+            .Members
+            .Where(w => w.Item1.Status == SiloStatus.Active)
+            .ToList()
+            .ConvertAll(item => item
+                .Item1
+                .SiloAddress.ToGatewayUri());
     }
 }
