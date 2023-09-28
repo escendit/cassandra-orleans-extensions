@@ -22,6 +22,7 @@ public static class ClientBuilderExtensions
         ArgumentNullException.ThrowIfNull(clientBuilder);
         return new ClusteringClientBuilder(clientBuilder
             .Services
-            .AddSingleton<IGatewayListProvider, CassandraGatewayListProvider>());
+            .AddSingleton<IGatewayListProvider, CassandraGatewayListProvider>()
+            .AddSingleton<IMembershipTable, CassandraMembershipTable>());
     }
 }
