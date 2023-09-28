@@ -211,6 +211,6 @@ public abstract partial class GrainStorageBase : IGrainStorage, ILifecyclePartic
         EventId = 500,
         EventName = "Exception",
         Level = LogLevel.Error,
-        Message = "{name}#{type}.{action}")]
+        Message = "{name}#{type}.{action} {message}")]
     private partial void LogException(string name, Exception exception, string message, string type, string action);
 }
