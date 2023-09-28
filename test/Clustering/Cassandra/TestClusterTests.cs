@@ -26,15 +26,28 @@ public class TestClusterTests
     }
 
     /// <summary>
-    /// Test A.
+    /// Test Cluster.
     /// </summary>
     /// <returns>The task.</returns>
     [Fact]
     [IntegrationTest]
-    public Task Test_A()
+    public Task Test_Cluster()
     {
         var cluster = _testClusterFixture.Cluster;
         Assert.NotNull(cluster);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Test Client.
+    /// </summary>
+    /// <returns>The task.</returns>
+    [Fact]
+    [IntegrationTest]
+    public Task Test_Client()
+    {
+        var client = _testClusterFixture.Cluster.Client;
+        Assert.NotNull(client);
         return Task.CompletedTask;
     }
 }
