@@ -301,7 +301,7 @@ internal sealed partial class CassandraMembershipTable : IMembershipTable, IDisp
                 .SuspectTimes
                 .ToList()
                 .ConvertAll(item =>
-                    new Tuple<SiloAddress, DateTime>(SiloAddress.FromParsableString(item.Item1), item.Item2.DateTime)),
+                    new Tuple<SiloAddress, DateTime>(SiloAddress.FromParsableString(item.Address), item.Timestamp)),
             HostName = entry.Value.HostName,
             ProxyPort = entry.Value.ProxyPort,
             RoleName = entry.Value.Role,
@@ -328,13 +328,14 @@ internal sealed partial class CassandraMembershipTable : IMembershipTable, IDisp
             Name = entry.SiloName,
             Role = entry.RoleName,
             SuspectTimes = entry.SuspectTimes is null
-                ? new List<Tuple<string, DateTimeOffset>>()
+                ? new List<SuspectTime>()
                 : entry
                     .SuspectTimes
-                    .ConvertAll(item =>
-                        new Tuple<string, DateTimeOffset>(
-                            item.Item1.ToParsableString(),
-                            item.Item2)),
+                    .ConvertAll(item => new SuspectTime
+                    {
+                        Address = item.Item1.ToParsableString(),
+                        Timestamp = item.Item2,
+                    }),
             Status = (int)entry.Status,
             FaultZone = entry.FaultZone,
             AliveOn = entry.IAmAliveTime,
