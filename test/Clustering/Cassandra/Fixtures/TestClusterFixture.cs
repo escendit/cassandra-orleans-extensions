@@ -25,6 +25,7 @@ public sealed class TestClusterFixture : IDisposable
             },
         };
         builder.AddSiloBuilderConfigurator<TestSiloConfigurator>();
+        builder.AddClientBuilderConfigurator<TestClientBuilderConfigurator>();
         Cluster = builder.Build();
         Cluster.Deploy();
     }
