@@ -40,7 +40,7 @@ public class CassandraGatewayListProvider : IGatewayListProvider
     /// <inheritdoc/>
     public Task InitializeGatewayListProvider()
     {
-        return Task.CompletedTask;
+        return _membershipTable.InitializeMembershipTable(false);
     }
 
     /// <inheritdoc/>
