@@ -9,9 +9,9 @@ namespace Escendit.Orleans.Clustering.Cassandra;
 public class Silo
 {
     /// <summary>
-    /// Gets or sets the blob.
+    /// Gets or sets the address.
     /// </summary>
-    /// <value>The blob.</value>
+    /// <value>The address.</value>
     public string Address { get; set; } = default!;
 
     /// <summary>
