@@ -2,4 +2,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\Clustering\Cassandra\Escendit.Orleans.Clustering.Cassandra.csproj"/>
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Orleans.TestingHost" />
+    </ItemGroup>
 </Project>
