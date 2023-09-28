@@ -12,7 +12,7 @@ using Orleans.Messaging;
 /// <summary>
 /// Service Collection Extensions.
 /// </summary>
-public static class ServiceCollectionExtensions
+internal static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Add Cassandra Clustering.
