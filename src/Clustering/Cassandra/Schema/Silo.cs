@@ -72,7 +72,7 @@ public class Silo
     /// Gets the suspect times.
     /// </summary>
     /// <value>The suspect times.</value>
-    public IList<Tuple<string, DateTimeOffset>> SuspectTimes { get; init; } = new List<Tuple<string, DateTimeOffset>>();
+    public IList<SuspectTime> SuspectTimes { get; init; } = new List<SuspectTime>();
 
     /// <summary>
     /// Gets or sets the update zone.
