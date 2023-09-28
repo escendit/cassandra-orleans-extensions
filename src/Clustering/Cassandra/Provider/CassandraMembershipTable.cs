@@ -7,6 +7,7 @@ namespace Escendit.Orleans.Clustering.Cassandra;
 
 using System.Reflection;
 using System.Text;
+
 using Escendit.Extensions.Hosting.Cassandra;
 using global::Cassandra;
 using global::Cassandra.Mapping;
@@ -14,14 +15,16 @@ using global::Orleans;
 using global::Orleans.Configuration;
 using global::Orleans.Runtime;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Options;
 
 /// <summary>
 /// Cassandra Membership Table.
 /// </summary>
-internal sealed class CassandraMembershipTable : IMembershipTable, IDisposable
+internal sealed partial class CassandraMembershipTable : IMembershipTable, IDisposable
 {
+    private readonly ILogger _logger;
     private readonly Assembly _selfAssembly;
     private readonly CassandraClientOptions _clientOptions;
     private readonly ClusterOptions _clusterOptions;
@@ -32,14 +35,17 @@ internal sealed class CassandraMembershipTable : IMembershipTable, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="CassandraMembershipTable"/> class.
     /// </summary>
+    /// <param name="logger">The logger.</param>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="options">The options.</param>
     public CassandraMembershipTable(
+        ILogger<CassandraMembershipTable> logger,
         IServiceProvider serviceProvider,
         IOptions<CassandraClusteringOptions> options)
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
         ArgumentNullException.ThrowIfNull(options);
+        _logger = logger;
         _clusterOptions = serviceProvider.GetRequiredService<IOptions<ClusterOptions>>().Value;
         _cluster = serviceProvider.GetRequiredServiceByName<ICluster>(options.Value.ClientName);
         _clientOptions = serviceProvider.GetOptionsByName<CassandraClientOptions>(options.Value.ClientName);
@@ -370,8 +376,22 @@ internal sealed class CassandraMembershipTable : IMembershipTable, IDisposable
     private async Task InitializeVersionDataAsync(string clusterId)
     {
         ArgumentNullException.ThrowIfNull(clusterId);
-        await _mapper!
-            .InsertIfNotExistsAsync(new Membership { Id = clusterId })
-            .ConfigureAwait(false);
+        try
+        {
+            await _mapper!
+                .InsertIfNotExistsAsync(new Membership { Id = clusterId })
+                .ConfigureAwait(false);
+        }
+        catch (InvalidCastException ex)
+        {
+            LogException(ex, ex.Message);
+        }
     }
+
+    [LoggerMessage(
+        EventId = 500,
+        EventName = "Log Exception",
+        Level = LogLevel.Error,
+        Message = "Error occurred: {message}")]
+    private partial void LogException(Exception ex, string message);
 }
