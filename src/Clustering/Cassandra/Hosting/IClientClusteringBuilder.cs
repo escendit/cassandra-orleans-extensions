@@ -6,6 +6,11 @@ namespace Orleans.Hosting;
 /// <summary>
 /// Clustering Client Builder.
 /// </summary>
-public interface IClusteringClientBuilder : IClientBuilder
+public interface IClientClusteringBuilder : IClientBuilder
 {
+    /// <summary>
+    /// Gets the name.
+    /// </summary>
+    /// <value>The name.</value>
+    public string Name { get; internal set; }
 }
