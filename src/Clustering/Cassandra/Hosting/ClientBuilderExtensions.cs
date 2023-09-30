@@ -3,9 +3,9 @@
 
 namespace Orleans.Hosting;
 
-using Escendit.Orleans.Clustering.Cassandra;
-using Messaging;
+using Escendit.Orleans.Clustering.Cassandra.Options;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 /// <summary>
 /// Client Builder Extensions.
@@ -16,13 +16,43 @@ public static class ClientBuilderExtensions
     /// Use Cassandra Clustering.
     /// </summary>
     /// <param name="clientBuilder">The initial silo builder.</param>
+    /// <param name="configureOptions">The configure options.</param>
     /// <returns>The updated silo builder.</returns>
-    public static IClusteringClientBuilder UseCassandraClustering(this IClientBuilder clientBuilder)
+    public static IClientClusteringBuilder UseCassandraClustering(
+        this IClientBuilder clientBuilder,
+        Action<CassandraGatewayListProviderOptions> configureOptions)
     {
         ArgumentNullException.ThrowIfNull(clientBuilder);
-        return new ClusteringClientBuilder(clientBuilder
-            .Services
-            .AddSingleton<IGatewayListProvider, CassandraGatewayListProvider>()
-            .AddSingleton<IMembershipTable, CassandraMembershipTable>());
+        clientBuilder
+            .UseCassandraClustering(
+                builder => builder.Configure(configureOptions));
+        return new ClientClusteringBuilder(clientBuilder.Services);
+    }
+
+    /// <summary>
+    /// Use Cassandra Clustering.
+    /// </summary>
+    /// <param name="clientBuilder">The initial silo builder.</param>
+    /// <param name="configureOptions">The configure options.</param>
+    /// <returns>The updated silo builder.</returns>
+    public static IClientClusteringBuilder UseCassandraClustering(
+        this IClientBuilder clientBuilder,
+        Action<OptionsBuilder<CassandraGatewayListProviderOptions>> configureOptions)
+    {
+        ArgumentNullException.ThrowIfNull(clientBuilder);
+        configureOptions.Invoke(clientBuilder.Services.AddOptions<CassandraGatewayListProviderOptions>());
+        return new ClientClusteringBuilder(clientBuilder.Services);
+    }
+
+    /// <summary>
+    /// Use Cassandra Clustering.
+    /// </summary>
+    /// <param name="clientBuilder">The initial silo builder.</param>
+    /// <returns>The updated silo builder.</returns>
+    public static IClientClusteringBuilder UseCassandraClustering(this IClientBuilder clientBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(clientBuilder);
+        clientBuilder.Services.AddOptions<CassandraGatewayListProviderOptions>();
+        return new ClientClusteringBuilder(clientBuilder.Services);
     }
 }
