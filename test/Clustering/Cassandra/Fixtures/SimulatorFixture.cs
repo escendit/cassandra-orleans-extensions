@@ -26,9 +26,7 @@ public sealed class SimulatorFixture
                     .Endpoints.Add("localhost");
                 options.DefaultKeyspace = "test";
             })
-            .Configure<ClusterOptions>(options => options.ClusterId = "default")
-            .Configure<CassandraClusteringOptions>(options => options.ClientName = "Default")
-            .AddCassandraClustering(options => options.ClientName = "Default");
+            .Configure<ClusterOptions>(options => options.ClusterId = "default");
 
         services
             .TryAddSingleton(typeof(IKeyedServiceCollection<,>), typeof(KeyedServiceCollection<,>));
