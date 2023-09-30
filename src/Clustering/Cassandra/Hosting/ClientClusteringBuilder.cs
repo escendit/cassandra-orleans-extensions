@@ -3,22 +3,26 @@
 
 namespace Orleans.Hosting;
 
+using Escendit.Extensions.Hosting.Cassandra;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Clustering Client Builder.
 /// </summary>
-internal class ClusteringClientBuilder : IClusteringClientBuilder
+internal class ClientClusteringBuilder : IClientClusteringBuilder
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ClusteringClientBuilder"/> class.
+    /// Initializes a new instance of the <see cref="ClientClusteringBuilder"/> class.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
-    public ClusteringClientBuilder(IServiceCollection serviceCollection)
+    public ClientClusteringBuilder(IServiceCollection serviceCollection)
     {
         Services = serviceCollection;
     }
 
     /// <inheritdoc/>
     public IServiceCollection Services { get; }
+
+    /// <inheritdoc/>
+    public string Name { get; set; } = CassandraClientOptions.DefaultOptionsKey;
 }
