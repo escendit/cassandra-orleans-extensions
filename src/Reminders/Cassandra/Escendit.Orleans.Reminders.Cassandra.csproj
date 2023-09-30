@@ -1,13 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
+        <PackageReference Include="Escendit.Extensions.Hosting.Cassandra" />
         <PackageReference Include="Microsoft.Orleans.Reminders"/>
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Hosting\" />
-      <Folder Include="Mapping\" />
       <Folder Include="Options\" />
-      <Folder Include="Provider\" />
-      <Folder Include="Resources\" />
-      <Folder Include="Schema\" />
     </ItemGroup>
 </Project>
