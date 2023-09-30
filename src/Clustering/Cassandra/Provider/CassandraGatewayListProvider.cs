@@ -13,7 +13,7 @@ using Options;
 /// <summary>
 /// Cassandra Gateway List Provider.
 /// </summary>
-internal class CassandraGatewayListProvider : SessionContextProviderBase, IGatewayListProvider
+internal sealed class CassandraGatewayListProvider : SessionContextProviderBase, IGatewayListProvider
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CassandraGatewayListProvider"/> class.
@@ -36,6 +36,11 @@ internal class CassandraGatewayListProvider : SessionContextProviderBase, IGatew
         ArgumentNullException.ThrowIfNull(options);
         MaxStaleness = options.MaxStaleness;
     }
+
+    /// <summary>
+    /// Finalizes an instance of the <see cref="CassandraGatewayListProvider"/> class.
+    /// </summary>
+    ~CassandraGatewayListProvider() => Dispose(false);
 
     /// <inheritdoc/>
     public TimeSpan MaxStaleness { get; }
