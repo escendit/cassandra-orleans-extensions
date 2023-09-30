@@ -18,6 +18,8 @@ public class TestSiloConfigurator : ISiloConfigurator
             .ConfigureLogging(options =>
             {
                 options.AddConsole();
+                options.AddFilter("Orleans", LogLevel.Information);
+                options.AddFilter("Escendit", LogLevel.Trace);
                 options.SetMinimumLevel(LogLevel.Debug);
             })
             .UseCassandraClustering()
@@ -26,6 +28,6 @@ public class TestSiloConfigurator : ISiloConfigurator
                 options.Endpoints.Add("localhost");
                 options.DefaultKeyspace = "test";
             })
-            .WithOptions(options => options.MaxStaleness = TimeSpan.FromDays(1));
+            .Build();
     }
 }
