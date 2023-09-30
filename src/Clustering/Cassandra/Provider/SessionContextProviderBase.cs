@@ -448,26 +448,27 @@ internal partial class SessionContextProviderBase : IDisposable
     private Task<T> Execute<T>(Func<Task<T>> action, [CallerMemberName] string actionName = default!)
     {
         ArgumentNullException.ThrowIfNull(action);
+        var returnType = typeof(T);
+        var selfType = GetType();
+        var returnTypeName = returnType.Name;
+        var selfTypeName = selfType.Name;
+        if (returnType.GenericTypeArguments.Any())
+        {
+            var arguments = string.Join(", ", returnType.GenericTypeArguments.ToList().ConvertAll(item => item.Name));
+            returnTypeName = $"{returnTypeName}<{arguments}>";
+        }
 
         try
         {
-            var type = typeof(T);
-            var typeName = type.Name;
-            if (type.GenericTypeArguments.Any())
-            {
-                var arguments = string.Join(", ", type.GenericTypeArguments.ToList().ConvertAll(item => item.Name));
-                typeName = $"{typeName}<{arguments}>";
-            }
-
             var stopwatch = Stopwatch.StartNew();
             var result = action();
             stopwatch.Stop();
-            LogExecute(_name, typeName, actionName, stopwatch.ElapsedMilliseconds);
+            LogExecute(_name, returnTypeName, selfTypeName, actionName, stopwatch.ElapsedMilliseconds);
             return result;
         }
         catch (Exception ex)
         {
-            LogException(_name, ex, ex.Message, typeof(T).FullName!, actionName);
+            LogException(_name, ex, ex.Message, returnTypeName, selfTypeName, actionName);
             throw;
         }
     }
@@ -523,8 +524,8 @@ internal partial class SessionContextProviderBase : IDisposable
         EventId = 200,
         EventName = "Execution",
         Level = LogLevel.Debug,
-        Message = "Executing {name}#{type}.{action} took {duration}ms")]
-    private partial void LogExecute(string name, string type, string action, long duration);
+        Message = "Executing with client {name} > {returnType} {type}.{action} completed in {elapsed}")]
+    private partial void LogExecute(string name, string returnType, string selfType, string action, long elapsed);
 
     [LoggerMessage(
         EventId = 500,
@@ -537,6 +538,6 @@ internal partial class SessionContextProviderBase : IDisposable
         EventId = 500,
         EventName = "Exception",
         Level = LogLevel.Error,
-        Message = "{name}#{type}.{action} {message}")]
-    private partial void LogException(string name, Exception exception, string message, string type, string action);
+        Message = "Exception with client {name} > {returnType} {type}.{action} {message}")]
+    private partial void LogException(string name, Exception exception, string message, string returnType, string type, string action);
 }
