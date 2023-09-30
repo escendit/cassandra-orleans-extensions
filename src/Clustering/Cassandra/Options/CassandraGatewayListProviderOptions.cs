@@ -6,16 +6,10 @@ namespace Escendit.Orleans.Clustering.Cassandra.Options;
 using global::Orleans.Messaging;
 
 /// <summary>
-/// Cassandra Clustering Options.
+/// Clustering Gateway List Provider Options.
 /// </summary>
-public record CassandraClusteringOptions
+public record CassandraGatewayListProviderOptions
 {
-    /// <summary>
-    /// Gets or sets the client name.
-    /// </summary>
-    /// <value>The client name.</value>
-    public string? ClientName { get; set; }
-
     /// <summary>
     /// Gets or sets the max staleness.
     /// </summary>
