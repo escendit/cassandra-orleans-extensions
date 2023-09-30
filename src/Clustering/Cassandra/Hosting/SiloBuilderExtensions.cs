@@ -16,12 +16,10 @@ public static class SiloBuilderExtensions
     /// </summary>
     /// <param name="siloBuilder">The initial silo builder.</param>
     /// <returns>The updated silo builder.</returns>
-    public static IClusteringSiloBuilder UseCassandraClustering(
+    public static ISiloClusteringBuilder UseCassandraClustering(
         this ISiloBuilder siloBuilder)
     {
         ArgumentNullException.ThrowIfNull(siloBuilder);
-        return new ClusteringSiloBuilder(siloBuilder
-            .Services
-            .AddSingleton<IMembershipTable, CassandraMembershipTable>());
+        return new SiloClusteringBuilder(siloBuilder.Services);
     }
 }
