@@ -21,6 +21,6 @@ public class TestClientBuilderConfigurator : IClientBuilderConfigurator
                 options.Endpoints.Add("localhost");
                 options.DefaultKeyspace = "test";
             })
-            .WithOptions(options => options.MaxStaleness = TimeSpan.FromDays(1));
+            .Build();
     }
 }
