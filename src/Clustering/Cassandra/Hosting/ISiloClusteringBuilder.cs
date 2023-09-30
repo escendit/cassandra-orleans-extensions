@@ -6,6 +6,11 @@ namespace Orleans.Hosting;
 /// <summary>
 /// Clustering Silo Builder.
 /// </summary>
-public interface IClusteringSiloBuilder : ISiloBuilder
+public interface ISiloClusteringBuilder : ISiloBuilder
 {
+    /// <summary>
+    /// Gets the name.
+    /// </summary>
+    /// <value>The name.</value>
+    public string Name { get; internal set; }
 }
