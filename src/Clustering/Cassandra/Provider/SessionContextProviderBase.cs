@@ -358,55 +358,6 @@ internal partial class SessionContextProviderBase : IDisposable
         _cluster.Dispose();
     }
 
-    /// <summary>
-    /// Execute.
-    /// </summary>
-    /// <param name="action">The action.</param>
-    /// <param name="actionName">The action name.</param>
-    /// <returns>The task.</returns>
-    protected Task Execute(Func<Task> action, [CallerMemberName] string actionName = default!)
-    {
-        ArgumentNullException.ThrowIfNull(action);
-        return Execute(async () =>
-        {
-            await action();
-            return true;
-        });
-    }
-
-    /// <summary>
-    /// Execute.
-    /// </summary>
-    /// <typeparam name="T">The type.</typeparam>
-    /// <param name="action">The action.</param>
-    /// <param name="actionName">The action name.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-    protected Task<T> Execute<T>(Func<Task<T>> action, [CallerMemberName] string actionName = default!)
-    {
-        ArgumentNullException.ThrowIfNull(action);
-
-        try
-        {
-            var type = typeof(T);
-            var typeName = type.Name;
-            if (type.GenericTypeArguments.Any())
-            {
-                var arguments = string.Join(", ", type.GenericTypeArguments.ToList().ConvertAll(item => item.Name));
-                typeName = $"{typeName}<{arguments}>";
-            }
-
-            var stopwatch = Stopwatch.StartNew();
-            var result = action();
-            LogExecute(_name, typeName, actionName, stopwatch.ElapsedMilliseconds);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            LogException(_name, ex, ex.Message, typeof(T).FullName!, actionName);
-            throw;
-        }
-    }
-
     private static KeyValuePair<string, Silo> MatchSiloKey(IDictionary<string, Silo> result, SiloAddress siloAddress)
     {
         return result
@@ -467,6 +418,58 @@ internal partial class SessionContextProviderBase : IDisposable
             UpdateZone = entry.UpdateZone,
             Timestamp = DateTime.UtcNow,
         };
+    }
+
+    /// <summary>
+    /// Execute.
+    /// </summary>
+    /// <param name="action">The action.</param>
+    /// <param name="actionName">The action name.</param>
+    /// <returns>The task.</returns>
+    private Task Execute(Func<Task> action, [CallerMemberName] string actionName = default!)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return Execute(
+            async () =>
+            {
+                await action();
+                return true;
+            },
+            actionName);
+    }
+
+    /// <summary>
+    /// Execute.
+    /// </summary>
+    /// <typeparam name="T">The type.</typeparam>
+    /// <param name="action">The action.</param>
+    /// <param name="actionName">The action name.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    private Task<T> Execute<T>(Func<Task<T>> action, [CallerMemberName] string actionName = default!)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+
+        try
+        {
+            var type = typeof(T);
+            var typeName = type.Name;
+            if (type.GenericTypeArguments.Any())
+            {
+                var arguments = string.Join(", ", type.GenericTypeArguments.ToList().ConvertAll(item => item.Name));
+                typeName = $"{typeName}<{arguments}>";
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+            var result = action();
+            stopwatch.Stop();
+            LogExecute(_name, typeName, actionName, stopwatch.ElapsedMilliseconds);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            LogException(_name, ex, ex.Message, typeof(T).FullName!, actionName);
+            throw;
+        }
     }
 
     private async Task InitializeVersionDataAsync(string clusterId)
