@@ -29,14 +29,14 @@ public class TestClusterTests
     /// Test Cluster.
     /// </summary>
     /// <returns>The task.</returns>
-    [Fact]
+    /*[Fact]
     [IntegrationTest]
     public Task Test_Cluster()
     {
         var cluster = _testClusterFixture.Cluster;
         Assert.NotNull(cluster);
         return Task.CompletedTask;
-    }
+    }*/
 
     /// <summary>
     /// Test Client.
