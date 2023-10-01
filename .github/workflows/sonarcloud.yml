@@ -60,7 +60,7 @@ jobs:
               shell: powershell
               run: |
                   .\.sonar\scanner\dotnet-sonarscanner begin `
-                    /k:"escendit_cassandra-dotnet-extensions" `
+                    /k:"escendit_cassandra-orleans-extensions" `
                     /o:"escendit" `
                     /v:${{ env.GitVersion_FullSemVer }} `
                     /d:sonar.login="${{ secrets.SONAR_TOKEN }}" `
@@ -86,7 +86,7 @@ jobs:
               shell: powershell
               run: |
                   .\.sonar\scanner\dotnet-sonarscanner begin `
-                    /k:"escendit_cassandra-dotnet-extensions" `
+                    /k:"escendit_cassandra-orleans-extensions" `
                     /o:"escendit" `
                     /v:${{ env.GitVersion_FullSemVer }} `
                     /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}" `
