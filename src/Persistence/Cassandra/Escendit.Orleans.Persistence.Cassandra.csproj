@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Description>Cassandra Grain Storage Provider for Orleans Persistence</Description>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Escendit.Extensions.Hosting.Cassandra" />
+        <PackageReference Include="Microsoft.Orleans.Runtime"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Mapping\" />
+      <Folder Include="Schema\" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Pack="true" PackagePath="" Include="README.md"/>
+    </ItemGroup>
+</Project>

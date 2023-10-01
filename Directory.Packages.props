@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageVersion Include="CassandraCSharpDriver" Version="3.19.3"/>
+        <PackageVersion Include="coverlet.collector" Version="6.0.0"/>
+        <PackageVersion Include="Escendit.Extensions.DependencyInjection.Cassandra" Version="0.1.0-rc.90"/>
+        <PackageVersion Include="Escendit.Extensions.Hosting.Cassandra" Version="0.1.0-rc.90"/>
+        <PackageVersion Include="Escendit.Tools.Branding" Version="1.0.2"/>
+        <PackageVersion Include="Escendit.Tools.CodeAnalysis.NetAnalyzers" Version="0.5.0"/>
+        <PackageVersion Include="Escendit.Tools.CodeAnalysis.NSubstituteAnalyzers" Version="0.1.0-rc.18"/>
+        <PackageVersion Include="Escendit.Tools.CodeAnalysis.SecurityCodeScanAnalyzers" Version="0.5.0"/>
+        <PackageVersion Include="Escendit.Tools.CodeAnalysis.SonarAnalyzers" Version="0.5.0"/>
+        <PackageVersion Include="Escendit.Tools.CodeAnalysis.StyleCopAnalyzers" Version="0.5.0"/>
+        <PackageVersion Include="Escendit.Tools.CodeAnalysis.xUnitAnalyzers" Version="0.1.0-rc.21"/>
+        <PackageVersion Include="Escendit.Tools.SourceLink.GitHub" Version="0.4.0"/>
+        <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0"/>
+        <PackageVersion Include="JunitXml.TestLogger" Version="3.0.134"/>
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2"/>
+        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'"/>
+        <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'"/>
+        <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'"/>
+        <PackageVersion Include="Microsoft.Orleans.Core" Version="7.2.1"/>
+        <PackageVersion Include="Microsoft.Orleans.Reminders" Version="7.2.1"/>
+        <PackageVersion Include="Microsoft.Orleans.Runtime" Version="7.2.1"/>
+        <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="7.2.1"/>
+        <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1"/>
+        <PackageVersion Include="NSubstitute" Version="5.1.0"/>
+        <PackageVersion Include="xunit" Version="2.5.1"/>
+        <PackageVersion Include="xunit.categories" Version="2.0.8"/>
+        <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.1"/>
+    </ItemGroup>
+</Project>

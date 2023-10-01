@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup>
+        <ParentDirectoryPackagesPropsPath>$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)..\'))</ParentDirectoryPackagesPropsPath>
+    </PropertyGroup>
+    <ImportGroup>
+        <Import Project="$(ParentDirectoryPackagesPropsPath)"/>
+    </ImportGroup>
+</Project>

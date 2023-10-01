@@ -1,0 +1,4 @@
+﻿branches:
+  master:
+    mode: ContinuousDeployment
+    tag: rc
