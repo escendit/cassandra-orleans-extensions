@@ -6,4 +6,8 @@
     <ItemGroup>
       <Folder Include="Options\" />
     </ItemGroup>
+    <ItemGroup>
+      <None Remove="Resources\SQL\1_Reminders.sql" />
+      <EmbeddedResource Include="Resources\SQL\1_Reminders.sql" />
+    </ItemGroup>
 </Project>
