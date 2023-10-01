@@ -10,7 +10,7 @@
     </PropertyGroup>
     <PropertyGroup>
         <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/escendit/cassandra-dotnet-extensions</RepositoryUrl>
+        <RepositoryUrl>https://github.com/escendit/cassandra-orleans-extensions</RepositoryUrl>
     </PropertyGroup>
     <PropertyGroup>
         <NoWarn>$(NoWarn);CS1591</NoWarn>
