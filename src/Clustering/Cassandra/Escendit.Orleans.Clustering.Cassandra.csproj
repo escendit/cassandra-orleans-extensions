@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Description>Cassandra Clustering Provider for Orleans Clustering</Description>
+    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Escendit.Extensions.DependencyInjection.Cassandra"/>
         <PackageReference Include="Microsoft.Orleans.Runtime" />
