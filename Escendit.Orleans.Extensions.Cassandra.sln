@@ -35,6 +35,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clustering", "Clustering", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.Orleans.Clustering.Cassandra.Tests", "test\Clustering\Cassandra\Escendit.Orleans.Clustering.Cassandra.Tests.csproj", "{A9488ABE-E593-46FB-9C63-32A687EEFE38}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reminders", "Reminders", "{051C13BE-64CE-42A2-A67C-46A7DCA55095}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escendit.Orleans.Reminders.Cassandra.Tests", "test\Reminders\Cassandra\Escendit.Orleans.Reminders.Cassandra.Tests.csproj", "{F14B85E6-725E-4F78-BDAB-0240DB573333}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +62,8 @@ Global
 		{7D40168C-40B6-4339-88A0-4F6E408F2EE7} = {9DC8501A-84DE-4272-A660-6615DA7C91B0}
 		{16F96498-E9B7-4747-898A-86AF7D6B44D5} = {F719A264-551D-450A-9FBF-F3802858FFAE}
 		{A9488ABE-E593-46FB-9C63-32A687EEFE38} = {16F96498-E9B7-4747-898A-86AF7D6B44D5}
+		{051C13BE-64CE-42A2-A67C-46A7DCA55095} = {F719A264-551D-450A-9FBF-F3802858FFAE}
+		{F14B85E6-725E-4F78-BDAB-0240DB573333} = {051C13BE-64CE-42A2-A67C-46A7DCA55095}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5B3BE032-E088-4FB8-A5AC-5BC0BF40F14A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -92,5 +98,9 @@ Global
 		{A9488ABE-E593-46FB-9C63-32A687EEFE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9488ABE-E593-46FB-9C63-32A687EEFE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9488ABE-E593-46FB-9C63-32A687EEFE38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F14B85E6-725E-4F78-BDAB-0240DB573333}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F14B85E6-725E-4F78-BDAB-0240DB573333}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F14B85E6-725E-4F78-BDAB-0240DB573333}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F14B85E6-725E-4F78-BDAB-0240DB573333}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
