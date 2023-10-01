@@ -11,6 +11,7 @@ using Escendit.Extensions.Hosting.Cassandra;
 using global::Cassandra;
 using global::Cassandra.Mapping;
 using global::Orleans.Runtime;
+using Mapping;
 using Microsoft.Extensions.Logging;
 using Schema;
 
@@ -24,8 +25,10 @@ internal partial class CassandraRemindersTable : IReminderTable
     private readonly ICluster _cluster;
     private readonly CassandraClientOptions _clientOptions;
     private readonly Assembly _selfAssembly;
+    private readonly MappingConfiguration _mapping;
     private ISession? _session;
     private IMapper? _mapper;
+    private PreparedStatement? _hashLookup;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CassandraRemindersTable"/> class.
@@ -49,6 +52,7 @@ internal partial class CassandraRemindersTable : IReminderTable
         _cluster = cluster;
         _clientOptions = clientOptions;
         _selfAssembly = typeof(CassandraRemindersTable).Assembly;
+        _mapping = new MappingConfiguration().Define<ReminderMapping>();
     }
 
     /// <inheritdoc/>
@@ -57,8 +61,9 @@ internal partial class CassandraRemindersTable : IReminderTable
         _session = await _cluster.ConnectAsync(string.Empty);
         _session.CreateKeyspaceIfNotExists(_clientOptions.DefaultKeyspace);
         _session.ChangeKeyspace(_clientOptions.DefaultKeyspace);
-        _mapper = new Mapper(_session);
+        _mapper = new Mapper(_session, _mapping);
         await InitializeDatabase();
+        _hashLookup = await _session.PrepareAsync("SELECT * FROM reminders WHERE hash > ? AND hash <= ? ALLOW FILTERING");
     }
 
     /// <inheritdoc/>
@@ -86,21 +91,29 @@ internal partial class CassandraRemindersTable : IReminderTable
     /// <inheritdoc/>
     public async Task<ReminderTableData> ReadRows(uint begin, uint end)
     {
-        var results = await _mapper!.FetchAsync<Reminder>("WHERE hash > ? and hash <= ?", (long)begin, (long)end);
-        if (results is null)
+        var bigBegin = Convert.ToInt64(begin);
+        var bigEnd = Convert.ToInt64(end);
+
+        var resultSet = await _session!.ExecuteAsync(_hashLookup!.Bind(bigBegin, bigEnd));
+        if (resultSet.GetAvailableWithoutFetching() == 0)
         {
             return new ReminderTableData();
         }
 
-        var items = results.ToList();
-        return new ReminderTableData(items.ConvertAll(item => new ReminderEntry
+        var items = new List<ReminderEntry>();
+        foreach (var row in resultSet.GetRows())
         {
-            GrainId = BuildGrainId(item.Type, item.Id),
-            ReminderName = item.Name,
-            ETag = item.Etag,
-            Period = TimeSpan.FromTicks(item.Period),
-            StartAt = item.StartOn.UtcDateTime,
-        }));
+            items.Add(new ReminderEntry
+            {
+                GrainId = BuildGrainId(row.GetValue<byte[]>("type"), row.GetValue<byte[]>("id")),
+                ReminderName = row.GetValue<string>("name"),
+                StartAt = row.GetValue<DateTimeOffset>("start_on").UtcDateTime,
+                Period = TimeSpan.FromTicks(row.GetValue<long>("period")),
+                ETag = row.GetValue<string>("etag"),
+            });
+        }
+
+        return new ReminderTableData(items);
     }
 
     /// <inheritdoc/>
@@ -139,7 +152,7 @@ internal partial class CassandraRemindersTable : IReminderTable
     public async Task<string> UpsertRow(ReminderEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        var etag = Guid.NewGuid();
+        var etag = Encoding.UTF8.GetString(GrainIdKeyExtensions.CreateGuidKey(Guid.NewGuid()).Value.ToArray());
         var (type, id) = GenerateDatabaseIds(entry.GrainId);
 
         var row = new Reminder(
@@ -149,11 +162,10 @@ internal partial class CassandraRemindersTable : IReminderTable
             entry.ReminderName,
             new DateTimeOffset(entry.StartAt),
             entry.Period.Ticks,
-            entry.ETag);
+            etag);
 
         await _mapper!.InsertAsync(row);
-
-        return entry.ETag;
+        return etag;
     }
 
     /// <inheritdoc/>
@@ -250,13 +262,13 @@ internal partial class CassandraRemindersTable : IReminderTable
         EventId = 200,
         EventName = "Execution",
         Level = LogLevel.Debug,
-        Message = "Executing with client {name} > {returnType} {type}.{action} completed in {elapsed}")]
+        Message = "Executing with client {name} > {returnType} {selfType}.{action} completed in {elapsed}")]
     private partial void LogExecute(string name, string returnType, string selfType, string action, long elapsed);
 
     [LoggerMessage(
         EventId = 500,
         EventName = "Exception",
         Level = LogLevel.Error,
-        Message = "Exception with client {name} > {returnType} {type}.{action} {message}")]
-    private partial void LogException(string name, Exception exception, string message, string returnType, string type, string action);
+        Message = "Exception with client {name} > {returnType} {selfType}.{action} {message}")]
+    private partial void LogException(string name, Exception exception, string message, string returnType, string selfType, string action);
 }
