@@ -524,7 +524,7 @@ internal partial class SessionContextProviderBase : IDisposable
         EventId = 200,
         EventName = "Execution",
         Level = LogLevel.Debug,
-        Message = "Executing with client {name} > {returnType} {type}.{action} completed in {elapsed}")]
+        Message = "Executing with client {name} > {returnType} {selfType}.{action} completed in {elapsed}")]
     private partial void LogExecute(string name, string returnType, string selfType, string action, long elapsed);
 
     [LoggerMessage(
@@ -538,6 +538,6 @@ internal partial class SessionContextProviderBase : IDisposable
         EventId = 500,
         EventName = "Exception",
         Level = LogLevel.Error,
-        Message = "Exception with client {name} > {returnType} {type}.{action} {message}")]
-    private partial void LogException(string name, Exception exception, string message, string returnType, string type, string action);
+        Message = "Exception with client {name} > {returnType} {selfType}.{action} {message}")]
+    private partial void LogException(string name, Exception exception, string message, string returnType, string selfType, string action);
 }
