@@ -9,6 +9,7 @@ using global::Orleans;
 /// <summary>
 /// Cassandra Storage Exception.
 /// </summary>
+[Serializable]
 [GenerateSerializer]
 public class CassandraStorageException : Exception
 {
