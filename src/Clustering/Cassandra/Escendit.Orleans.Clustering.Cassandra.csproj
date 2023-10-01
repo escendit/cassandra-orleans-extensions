@@ -14,4 +14,7 @@
         <None Remove="Resources\SQL\3_Membership.sql"/>
         <EmbeddedResource Include="Resources\SQL\3_Membership.sql"/>
     </ItemGroup>
+    <ItemGroup>
+        <None Pack="true" PackagePath="" Include="README.md"/>
+    </ItemGroup>
 </Project>
