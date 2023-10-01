@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Description>Cassandra Reminder Service Provider for Orleans Reminders</Description>
+    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Escendit.Extensions.Hosting.Cassandra"/>
         <PackageReference Include="Microsoft.Orleans.Reminders"/>
