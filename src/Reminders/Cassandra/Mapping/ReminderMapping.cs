@@ -17,11 +17,10 @@ public class ReminderMapping : Mappings
     public ReminderMapping()
     {
         For<Reminder>()
-            .TableName("reminders")
-            .ClusteringKey("type", "id", "name")
+            .PartitionKey("type", "id", "name")
             .Column(p => p.Type, cm => cm.WithName("type"))
             .Column(p => p.Id, cm => cm.WithName("id"))
-            .Column(p => p.Hash, cm => cm.WithName("hash"))
+            .Column(p => p.Hash, cm => cm.WithName("hash").WithSecondaryIndex())
             .Column(p => p.Name, cm => cm.WithName("name"))
             .Column(p => p.StartOn, cm => cm.WithName("start_on"))
             .Column(p => p.Period, cm => cm.WithName("period"))
