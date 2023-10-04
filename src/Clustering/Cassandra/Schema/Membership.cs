@@ -6,7 +6,7 @@ namespace Escendit.Orleans.Clustering.Cassandra;
 /// <summary>
 /// Membership.
 /// </summary>
-public class Membership
+internal class Membership
 {
     /// <summary>
     /// Gets or sets the id.
