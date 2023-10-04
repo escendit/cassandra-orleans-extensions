@@ -6,19 +6,19 @@ namespace Escendit.Orleans.Persistence.Cassandra.Schema;
 /// <summary>
 /// Single Grain Storage Table.
 /// </summary>
-public class SingleGrainStorageTable
+internal class SingleGrainStorageTable
 {
     /// <summary>
     /// Gets or sets the type.
     /// </summary>
     /// <value>The type.</value>
-    public byte[] Type { get; set; }
+    public byte[]? Type { get; set; }
 
     /// <summary>
     /// Gets or sets the id.
     /// </summary>
     /// <value>The id.</value>
-    public byte[] Id { get; set; }
+    public byte[]? Id { get; set; }
 
     /// <summary>
     /// Gets or sets the name.
@@ -30,7 +30,7 @@ public class SingleGrainStorageTable
     /// Gets or sets the state.
     /// </summary>
     /// <value>The state.</value>
-    public byte[] State { get; set; }
+    public byte[]? State { get; set; }
 
     /// <summary>
     /// Gets or sets the etag.
