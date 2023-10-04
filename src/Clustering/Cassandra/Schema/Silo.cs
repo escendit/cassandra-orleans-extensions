@@ -6,7 +6,7 @@ namespace Escendit.Orleans.Clustering.Cassandra;
 /// <summary>
 /// Silo.
 /// </summary>
-public class Silo
+internal class Silo
 {
     /// <summary>
     /// Gets or sets the address.
