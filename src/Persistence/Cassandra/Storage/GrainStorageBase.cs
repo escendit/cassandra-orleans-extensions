@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Grain Storage Base.
 /// </summary>
-public abstract partial class GrainStorageBase : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>, IDisposable
+internal abstract partial class GrainStorageBase : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>, IDisposable
 {
     private readonly string _name;
     private readonly ILogger _logger;
