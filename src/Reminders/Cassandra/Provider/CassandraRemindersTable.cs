@@ -284,7 +284,7 @@ internal partial class CassandraRemindersTable : IReminderTable
         EventId = 200,
         EventName = "Execution",
         Level = LogLevel.Debug,
-        Message = "Executing with client {name} > {returnType} {selfType}.{action} completed in {elapsed}")]
+        Message = "Executing with client {name} > {returnType} {selfType}.{action} completed in {elapsed}ms")]
     private partial void LogExecute(string name, string returnType, string selfType, string action, long elapsed);
 
     [LoggerMessage(
