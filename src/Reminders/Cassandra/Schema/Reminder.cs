@@ -13,17 +13,17 @@ public record Reminder
     /// </summary>
     /// <param name="type">The grain id's type.</param>
     /// <param name="id">The grain id's id.</param>
-    /// <param name="hash">The hash.</param>
     /// <param name="name">The name.</param>
+    /// <param name="hash">The hash.</param>
     /// <param name="startOn">The start on.</param>
     /// <param name="period">The period.</param>
     /// <param name="etag">The etag.</param>
-    public Reminder(byte[] type, byte[] id, long hash, string name, DateTimeOffset startOn, long period, string etag)
+    public Reminder(byte[] type, byte[] id, string name, long hash, DateTimeOffset startOn, long period, string etag)
     {
         Type = type;
         Id = id;
-        Hash = hash;
         Name = name;
+        Hash = hash;
         StartOn = startOn;
         Period = period;
         Etag = etag;
@@ -57,7 +57,7 @@ public record Reminder
     /// Gets or sets the start on.
     /// </summary>
     /// <value>The start on.</value>
-    public DateTimeOffset StartOn { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset StartOn { get; set; }
 
     /// <summary>
     /// Gets or sets the period.

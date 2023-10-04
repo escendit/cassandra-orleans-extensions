@@ -42,9 +42,11 @@ public class TestClusterTests
     {
         var cluster = _testClusterFixture.Cluster;
         var testGrain = cluster.GrainFactory.GetGrain<ITestGrain>(0);
+        await Task.Delay(1000);
         await testGrain.RemindMe("test");
         Assert.NotNull(testGrain);
         await Task.Delay(TimeSpan.FromSeconds(70));
+        await testGrain.ForgetMe();
         Assert.NotNull(testGrain);
     }
 }

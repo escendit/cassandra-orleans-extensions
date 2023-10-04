@@ -7,19 +7,22 @@ namespace Escendit.Orleans.Persistence.Cassandra.Storage;
 
 using Escendit.Extensions.Hosting.Cassandra;
 using global::Cassandra;
+using global::Cassandra.Data.Linq;
+using global::Cassandra.Mapping;
 using global::Orleans;
 using global::Orleans.Runtime;
+using Mapping;
 using Microsoft.Extensions.Logging;
 using Options;
+using Schema;
 
 /// <summary>
 /// Single Table Grain Storage.
 /// </summary>
-internal partial class SingleTableGrainStorage : GrainStorageBase
+internal class SingleTableGrainStorage : GrainStorageBase
 {
-    private readonly ILogger _logger;
-    private readonly CassandraClientOptions _clientOptions;
     private readonly CassandraStorageOptions _storageOptions;
+    private readonly MappingConfiguration _mappingConfiguration;
     private PreparedStatement? _readStatement;
     private PreparedStatement? _writeStatement;
     private PreparedStatement? _clearStatement;
@@ -40,9 +43,9 @@ internal partial class SingleTableGrainStorage : GrainStorageBase
         CassandraStorageOptions storageOptions)
         : base(name, logger, serviceProvider.GetRequiredCassandraClient(name), clientOptions)
     {
-        _logger = logger;
-        _clientOptions = clientOptions;
         _storageOptions = storageOptions;
+        _mappingConfiguration = new MappingConfiguration()
+            .Define<SingleGrainStorageMapping>();
     }
 
     /// <inheritdoc/>
@@ -80,59 +83,41 @@ internal partial class SingleTableGrainStorage : GrainStorageBase
     {
         await base.Initialize(cancellationToken);
 
-        var results = await Execute(
-            () => Session!
-                .ExecuteAsync(
-                    new SimpleStatement(
-                        "SELECT table_name FROM system_schema.tables WHERE keyspace_name = ? AND table_name = ? ALLOW FILTERING",
-                        _clientOptions.DefaultKeyspace!,
-                        _storageOptions.TableNameOrPrefix)));
-
-        if (results.GetAvailableWithoutFetching() == 0)
-        {
-            var result = await Execute(
-                () => Session!.ExecuteAsync(
-                    new SimpleStatement(
-                        $"""
-                         create table "{_storageOptions.TableNameOrPrefix}" (
-                             name   varchar,
-                             type   blob,
-                             id     blob,
-                             state  blob,
-                             etag   varchar
-                             primary key ((name, type, id))
-                         )
-                         """)));
-
-            if (result.GetAvailableWithoutFetching() != 0)
-            {
-                LogTableCreated(_storageOptions.TableNameOrPrefix!);
-            }
-        }
+        var storage =
+            new Table<SingleGrainStorageTable>(Session, _mappingConfiguration, _storageOptions.TableNameOrPrefix);
+        await Execute(() => storage.CreateIfNotExistsAsync());
 
         _readStatement =
             await Execute(
                 () => Session!.PrepareAsync(
-                    $"select name, type, id, state, etag, exists from \"{_storageOptions.TableNameOrPrefix}\" where name = :name and type = :type and id = :id ALLOW FILTERING"));
+                    $"""
+                     SELECT name, type, id, state, etag
+                     FROM "{_storageOptions.TableNameOrPrefix}"
+                     WHERE name = ? AND type = ? AND id = ?
+                     """));
         _writeStatement =
             await Execute(
                 () => Session!.PrepareAsync(
-                    $"insert into \"{_storageOptions.TableNameOrPrefix}\" (name, type, id, state, etag) VALUES (:name, :type, :id, :state, :etag)"));
+                    $"""
+                     INSERT INTO "{_storageOptions.TableNameOrPrefix}" (name, type, id, state, etag)
+                     VALUES (?, ?, ?, ?, ?)
+                     """));
         _clearStatement =
             await Execute(
                 () => Session!.PrepareAsync(
-                    $"delete from \"{_storageOptions.TableNameOrPrefix}\" where name = :name and type = :type and id = :id"));
+                    $"""
+                     DELETE FROM "{_storageOptions.TableNameOrPrefix}"
+                     WHERE name = ? AND type = ? AND id = ?
+                     """));
     }
 
     private async Task ReadStateInternalAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
     {
-        var results = await Execute(
-            () => Session!.ExecuteAsync(_readStatement!.Bind(new
-                {
-                    id = GenerateId<T>(stateName, grainId),
-                    type = GenerateTypeName<T>(stateName, grainId),
-                    name = GenerateStateName<T>(stateName, grainId),
-                })));
+        var name = GenerateStateName<T>(stateName, grainId);
+        var type = GenerateTypeName<T>(stateName, grainId);
+        var id = GenerateId<T>(stateName, grainId);
+        var results = await Execute(() =>
+            Session!.ExecuteAsync(_readStatement!.Bind(name, type, id)));
 
         if (results.GetAvailableWithoutFetching() == 0)
         {
@@ -156,20 +141,17 @@ internal partial class SingleTableGrainStorage : GrainStorageBase
         var id = GenerateId<T>(stateName, grainId);
         var state = _storageOptions.GrainStorageSerializer!.Serialize(grainState.State).ToArray();
         var etag = grainState.ETag;
-        await Execute(
-            () => Session!.ExecuteAsync(_writeStatement!.Bind(new { name, type, id, state, etag, })));
+        await Execute(() =>
+            Session!.ExecuteAsync(_writeStatement!.Bind(name, type, id, state, etag)));
     }
 
     private async Task ClearStateInternalAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
     {
-        var results = await
-            Execute(() => Session!.ExecuteAsync(_clearStatement!.Bind(
-                new
-                {
-                    id = GenerateId<T>(stateName, grainId),
-                    type = GenerateTypeName<T>(stateName, grainId),
-                    name = GenerateStateName<T>(stateName, grainId),
-                })));
+        var name = GenerateStateName<T>(stateName, grainId);
+        var type = GenerateTypeName<T>(stateName, grainId);
+        var id = GenerateId<T>(stateName, grainId);
+        var results = await Execute(() =>
+            Session!.ExecuteAsync(_clearStatement!.Bind(name, type, id)));
 
         if (results.GetAvailableWithoutFetching() != 0)
         {
@@ -178,11 +160,4 @@ internal partial class SingleTableGrainStorage : GrainStorageBase
             grainState.RecordExists = default;
         }
     }
-
-    [LoggerMessage(
-        EventId = 200,
-        EventName = "SingleTable Created",
-        Level = LogLevel.Information,
-        Message = "Strategy SingleTable '{tableName}' created")]
-    private partial void LogTableCreated(string tableName);
 }

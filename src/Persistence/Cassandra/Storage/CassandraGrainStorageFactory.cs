@@ -27,7 +27,8 @@ public static class CassandraGrainStorageFactory
         {
             Strategy.SingleTable => ActivatorUtilities
                 .CreateInstance<SingleTableGrainStorage>(serviceProvider, name, options, connectionOptions),
-            Strategy.TablePerGrain => throw new NotImplementedException(),
+            Strategy.TablePerGrain => throw new NotSupportedException(),
+            null => throw new NotSupportedException(),
             _ => throw new ArgumentOutOfRangeException(name),
         };
     }

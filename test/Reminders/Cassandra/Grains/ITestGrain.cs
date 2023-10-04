@@ -14,4 +14,10 @@ public interface ITestGrain : IGrainWithIntegerKey
     /// <param name="message">The message.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task RemindMe(string message);
+
+    /// <summary>
+    /// Forget Me.
+    /// </summary>
+    /// <returns>The task.</returns>
+    public Task ForgetMe();
 }

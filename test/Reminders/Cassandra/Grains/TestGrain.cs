@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 public class TestGrain : IGrainBase, ITestGrain, IRemindable
 {
     private readonly ILogger _logger;
+    private IGrainReminder? _grainReminder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestGrain"/> class.
@@ -28,10 +29,18 @@ public class TestGrain : IGrainBase, ITestGrain, IRemindable
     public IGrainContext GrainContext { get; }
 
     /// <inheritdoc/>
-    public Task RemindMe(string message)
+    public async Task RemindMe(string message)
     {
         ArgumentNullException.ThrowIfNull(message);
-        return this.RegisterOrUpdateReminder("rememberMe", TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
+        _grainReminder = await this.RegisterOrUpdateReminder("rememberMe", TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
+    }
+
+    /// <inheritdoc/>
+    public Task ForgetMe()
+    {
+        return _grainReminder is null
+            ? Task.CompletedTask
+            : this.UnregisterReminder(_grainReminder);
     }
 
     /// <inheritdoc/>
