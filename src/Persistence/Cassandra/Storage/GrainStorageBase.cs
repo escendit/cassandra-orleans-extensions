@@ -181,14 +181,20 @@ public abstract partial class GrainStorageBase : IGrainStorage, ILifecyclePartic
         {
             var stopwatch = Stopwatch.StartNew();
             var result = action();
-            stopwatch.Stop();
-            LogExecute(_name, returnTypeName, selfTypeName, actionName, stopwatch.ElapsedMilliseconds);
+            result.ContinueWith(
+                (_, _) =>
+                {
+                    stopwatch.Stop();
+                    LogExecute(_name, returnTypeName, selfTypeName, actionName, stopwatch.ElapsedMilliseconds);
+                },
+                TaskContinuationOptions.OnlyOnRanToCompletion,
+                TaskScheduler.Default);
             return result;
         }
         catch (Exception ex)
         {
             LogException(_name, ex, ex.Message, returnTypeName, selfTypeName, actionName);
-            throw;
+            throw new CassandraStorageException(ex.Message, ex);
         }
     }
 
@@ -217,7 +223,7 @@ public abstract partial class GrainStorageBase : IGrainStorage, ILifecyclePartic
         EventId = 200,
         EventName = "Execution",
         Level = LogLevel.Debug,
-        Message = "Executing with client {name} > {returnType} {selfType}.{action} completed in {elapsed}")]
+        Message = "Executing with client {name} > {returnType} {selfType}.{action} completed in {elapsed}ms")]
     private partial void LogExecute(string name, string returnType, string selfType, string action, long elapsed);
 
     [LoggerMessage(
