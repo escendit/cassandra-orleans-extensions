@@ -4,11 +4,11 @@
 namespace Escendit.Orleans.Reminders.Cassandra.Provider;
 
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Escendit.Extensions.Hosting.Cassandra;
 using global::Cassandra;
+using global::Cassandra.Data.Linq;
 using global::Cassandra.Mapping;
 using global::Orleans.Runtime;
 using Mapping;
@@ -20,15 +20,17 @@ using Schema;
 /// </summary>
 internal partial class CassandraRemindersTable : IReminderTable
 {
+    private const string RemindersTableName = "orleans_reminders";
     private readonly string _name;
     private readonly ILogger _logger;
     private readonly ICluster _cluster;
     private readonly CassandraClientOptions _clientOptions;
-    private readonly Assembly _selfAssembly;
     private readonly MappingConfiguration _mapping;
     private ISession? _session;
-    private IMapper? _mapper;
-    private PreparedStatement? _hashLookup;
+    private PreparedStatement? _readRowsStatement;
+    private PreparedStatement? _readRowsHashStatement;
+    private PreparedStatement? _readRowStatement;
+    private PreparedStatement? _upsertRowStatement;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CassandraRemindersTable"/> class.
@@ -51,8 +53,8 @@ internal partial class CassandraRemindersTable : IReminderTable
         _logger = logger;
         _cluster = cluster;
         _clientOptions = clientOptions;
-        _selfAssembly = typeof(CassandraRemindersTable).Assembly;
-        _mapping = new MappingConfiguration().Define<ReminderMapping>();
+        _mapping = new MappingConfiguration()
+            .Define<ReminderMapping>();
     }
 
     /// <inheritdoc/>
@@ -61,31 +63,25 @@ internal partial class CassandraRemindersTable : IReminderTable
         _session = await _cluster.ConnectAsync(string.Empty);
         _session.CreateKeyspaceIfNotExists(_clientOptions.DefaultKeyspace);
         _session.ChangeKeyspace(_clientOptions.DefaultKeyspace);
-        _mapper = new Mapper(_session, _mapping);
         await InitializeDatabase();
-        _hashLookup = await _session.PrepareAsync("SELECT * FROM reminders WHERE hash > ? AND hash <= ? ALLOW FILTERING");
+        await InitializeStatements();
     }
 
     /// <inheritdoc/>
     public async Task<ReminderTableData> ReadRows(GrainId grainId)
     {
         var (type, id) = GenerateDatabaseIds(grainId);
-        var results = await _mapper!.FetchAsync<Reminder>("WHERE type = ? AND id = ?", type, id);
-        if (results is null)
+        var resultSet = await Execute(() =>
+            _session!.ExecuteAsync(_readRowsStatement!.Bind(type, id)));
+        if (resultSet.GetAvailableWithoutFetching() == 0)
         {
             return new ReminderTableData();
         }
 
-        return new ReminderTableData(results
-            .ToList()
-            .ConvertAll(item => new ReminderEntry
-            {
-                GrainId = grainId,
-                ReminderName = item.Name,
-                ETag = item.Etag,
-                Period = TimeSpan.FromTicks(item.Period),
-                StartAt = item.StartOn.UtcDateTime,
-            }));
+        return new ReminderTableData(resultSet
+            .GetRows()
+            .Select(MapReminderEntry)
+            .AsEnumerable());
     }
 
     /// <inheritdoc/>
@@ -94,26 +90,17 @@ internal partial class CassandraRemindersTable : IReminderTable
         var bigBegin = Convert.ToInt64(begin);
         var bigEnd = Convert.ToInt64(end);
 
-        var resultSet = await _session!.ExecuteAsync(_hashLookup!.Bind(bigBegin, bigEnd));
+        var resultSet = await Execute(() =>
+            _session!.ExecuteAsync(_readRowsHashStatement!.Bind(bigBegin, bigEnd)));
         if (resultSet.GetAvailableWithoutFetching() == 0)
         {
             return new ReminderTableData();
         }
 
-        var items = new List<ReminderEntry>();
-        foreach (var row in resultSet.GetRows())
-        {
-            items.Add(new ReminderEntry
-            {
-                GrainId = BuildGrainId(row.GetValue<byte[]>("type"), row.GetValue<byte[]>("id")),
-                ReminderName = row.GetValue<string>("name"),
-                StartAt = row.GetValue<DateTimeOffset>("start_on").UtcDateTime,
-                Period = TimeSpan.FromTicks(row.GetValue<long>("period")),
-                ETag = row.GetValue<string>("etag"),
-            });
-        }
-
-        return new ReminderTableData(items);
+        return new ReminderTableData(resultSet
+            .GetRows()
+            .Select(MapReminderEntry)
+            .AsEnumerable());
     }
 
     /// <inheritdoc/>
@@ -121,31 +108,17 @@ internal partial class CassandraRemindersTable : IReminderTable
     {
         ArgumentNullException.ThrowIfNull(reminderName);
         var (type, id) = GenerateDatabaseIds(grainId);
-        var results
-            = await _mapper!
-                .FetchAsync<Reminder>("WHERE type = ? AND id = ? AND name = ?", type, id, reminderName);
-
-        if (results is null)
+        var resultSet = await Execute(() =>
+            _session!.ExecuteAsync(_readRowStatement!.Bind(type, id, reminderName)));
+        if (resultSet.GetAvailableWithoutFetching() == 0)
         {
             return new ReminderEntry();
         }
 
-        var items = results.ToList();
-
-        if (!items.Any())
-        {
-            return new ReminderEntry();
-        }
-
-        var item = items.First()!;
-        return new ReminderEntry
-        {
-            GrainId = grainId,
-            ReminderName = reminderName,
-            ETag = item.Etag,
-            Period = TimeSpan.FromTicks(item.Period),
-            StartAt = item.StartOn.UtcDateTime,
-        };
+        return resultSet
+            .GetRows()
+            .Select(MapReminderEntry)
+            .First();
     }
 
     /// <inheritdoc/>
@@ -154,17 +127,17 @@ internal partial class CassandraRemindersTable : IReminderTable
         ArgumentNullException.ThrowIfNull(entry);
         var etag = Encoding.UTF8.GetString(GrainIdKeyExtensions.CreateGuidKey(Guid.NewGuid()).Value.ToArray());
         var (type, id) = GenerateDatabaseIds(entry.GrainId);
-
-        var row = new Reminder(
-            type,
-            id,
-            entry.GrainId.GetUniformHashCode(),
-            entry.ReminderName,
-            new DateTimeOffset(entry.StartAt),
-            entry.Period.Ticks,
-            etag);
-
-        await _mapper!.InsertAsync(row);
+        await Execute(() =>
+            _session!
+                .ExecuteAsync(_upsertRowStatement!
+                    .Bind(
+                        type,
+                        id,
+                        entry.ReminderName,
+                        Convert.ToInt64(entry.GrainId.GetUniformHashCode()),
+                        new DateTimeOffset(entry.StartAt),
+                        entry.Period.Ticks,
+                        etag)));
         return etag;
     }
 
@@ -173,14 +146,25 @@ internal partial class CassandraRemindersTable : IReminderTable
     {
         ArgumentNullException.ThrowIfNull(reminderName);
         ArgumentNullException.ThrowIfNull(eTag);
-        var info = await _mapper!.DeleteIfAsync<Reminder>("WHERE type = ? AND id = ? AND name = ? AND etag = ?");
-        return info.Applied;
+        var (type, id) = GenerateDatabaseIds(grainId);
+        var resultSet = await Execute(() =>
+            _session!.ExecuteAsync(new SimpleStatement(
+                $"""
+                DELETE FROM "{RemindersTableName}"
+                WHERE type = ? AND id = ? AND name = ?
+                IF etag = ?
+                """,
+                type,
+                id,
+                reminderName,
+                eTag)));
+        return resultSet.GetAvailableWithoutFetching() > 0;
     }
 
     /// <inheritdoc/>
     public Task TestOnlyClearTable()
     {
-        return _mapper!.DeleteAsync<Reminder>("1=1");
+        return Execute(() => _session!.ExecuteAsync(new SimpleStatement($"""DELETE FROM "{RemindersTableName}";""")));
     }
 
     private static (byte[] Type, byte[] Id) GenerateDatabaseIds(GrainId grainId)
@@ -195,32 +179,41 @@ internal partial class CassandraRemindersTable : IReminderTable
 
     private async Task InitializeDatabase()
     {
-        var remindersTableStream =
-            _selfAssembly.GetManifestResourceStream(
-                "Escendit.Orleans.Reminders.Cassandra.Resources.SQL.1_Reminders.sql");
-
-        using var remindersTableReader = new StreamReader(remindersTableStream!, Encoding.UTF8, true);
-        var sqlRemindersTable = await remindersTableReader.ReadToEndAsync().ConfigureAwait(false);
-
-        await _session!.ExecuteAsync(new SimpleStatement(sqlRemindersTable));
+        await Execute(() => new Table<Reminder>(_session, _mapping, RemindersTableName)
+            .CreateIfNotExistsAsync());
     }
 
-    /// <summary>
-    /// Execute.
-    /// </summary>
-    /// <param name="action">The action.</param>
-    /// <param name="actionName">The action name.</param>
-    /// <returns>The task.</returns>
-    private Task Execute(Func<Task> action, [CallerMemberName] string actionName = default!)
+    private async Task InitializeStatements()
     {
-        ArgumentNullException.ThrowIfNull(action);
-        return Execute(
-            async () =>
-            {
-                await action();
-                return true;
-            },
-            actionName);
+        _readRowsStatement = await Execute(() =>
+            _session!.PrepareAsync(
+                $"""
+                SELECT type, id, name, start_on, period, etag
+                FROM "{RemindersTableName}"
+                WHERE type = ? AND id = ?
+                ALLOW FILTERING
+                """));
+        _readRowsHashStatement = await Execute(() =>
+            _session!.PrepareAsync(
+                $"""
+                SELECT type, id, name, start_on, period, etag
+                FROM "{RemindersTableName}"
+                WHERE hash > ? AND hash <= ?
+                ALLOW FILTERING
+                """));
+        _readRowStatement = await Execute(() =>
+            _session!.PrepareAsync(
+                $"""
+                SELECT type, id, name, start_on, period, etag
+                FROM "{RemindersTableName}"
+                WHERE type = ? AND id = ? AND name = ?
+                """));
+        _upsertRowStatement = await Execute(() =>
+            _session!.PrepareAsync(
+                $"""
+                INSERT INTO "{RemindersTableName}" (type, id, name, hash, start_on, period, etag)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """));
     }
 
     /// <summary>
@@ -247,8 +240,14 @@ internal partial class CassandraRemindersTable : IReminderTable
         {
             var stopwatch = Stopwatch.StartNew();
             var result = action();
-            stopwatch.Stop();
-            LogExecute(_name, returnTypeName, selfTypeName, actionName, stopwatch.ElapsedMilliseconds);
+            result.ContinueWith(
+                (_, _) =>
+                {
+                    stopwatch.Stop();
+                    LogExecute(_name, returnTypeName, selfTypeName, actionName, stopwatch.ElapsedMilliseconds);
+                },
+                TaskContinuationOptions.OnlyOnRanToCompletion,
+                TaskScheduler.Default);
             return result;
         }
         catch (Exception ex)
@@ -256,6 +255,29 @@ internal partial class CassandraRemindersTable : IReminderTable
             LogException(_name, ex, ex.Message, returnTypeName, selfTypeName, actionName);
             throw;
         }
+    }
+
+    private Task Execute(Func<Task> action, [CallerMemberName] string actionName = default!)
+    {
+        return Execute(
+            async () =>
+            {
+                await action();
+                return true;
+            },
+            actionName);
+    }
+
+    private ReminderEntry MapReminderEntry(Row row)
+    {
+        return new ReminderEntry
+        {
+            GrainId = BuildGrainId(row.GetValue<byte[]>("type"), row.GetValue<byte[]>("id")),
+            ReminderName = row.GetValue<string>("name"),
+            StartAt = row.GetValue<DateTimeOffset>("start_on").UtcDateTime,
+            Period = TimeSpan.FromTicks(row.GetValue<long>("period")),
+            ETag = row.GetValue<string>("etag"),
+        };
     }
 
     [LoggerMessage(
