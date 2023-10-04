@@ -11,7 +11,7 @@ using Options;
 /// <summary>
 /// Cassandra Grain Storage Factory.
 /// </summary>
-public static class CassandraGrainStorageFactory
+internal static class CassandraGrainStorageFactory
 {
     /// <summary>
     /// Create GrainStorage.
