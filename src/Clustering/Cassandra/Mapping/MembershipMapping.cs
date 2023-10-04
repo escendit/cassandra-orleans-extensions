@@ -8,7 +8,7 @@ using global::Cassandra.Mapping;
 /// <summary>
 /// Membership Mapping.
 /// </summary>
-public class MembershipMapping : Mappings
+internal class MembershipMapping : Mappings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MembershipMapping"/> class.
