@@ -97,8 +97,6 @@ public static class ServiceCollectionExtensions
         }
 
         return services
-            .AddTransient<IConfigurationValidator>(sp =>
-                new CassandraStorageOptionsValidator(sp.GetOptionsByName<CassandraStorageOptions>(name), name))
             .ConfigureNamedOptionForLogging<CassandraStorageOptions>(name)
             .ConfigureOptions<DefaultCassandraPostConfigureOptions>()
             .AddSingletonNamedService<IGrainStorage>(name, CassandraGrainStorageFactory.Create)
