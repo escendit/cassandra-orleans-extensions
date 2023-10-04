@@ -7,10 +7,6 @@
         <PackageReference Include="Microsoft.Orleans.Runtime"/>
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Mapping\" />
-      <Folder Include="Schema\" />
-    </ItemGroup>
-    <ItemGroup>
         <None Pack="true" PackagePath="" Include="README.md"/>
     </ItemGroup>
 </Project>
