@@ -11,16 +11,18 @@ using global::Orleans;
 using global::Orleans.Runtime;
 using global::Orleans.Storage;
 using Microsoft.Extensions.Logging;
+using Options;
 
 /// <summary>
 /// Grain Storage Base.
 /// </summary>
-public abstract partial class GrainStorageBase : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>, IDisposable
+internal abstract partial class GrainStorageBase : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>, IDisposable
 {
     private readonly string _name;
     private readonly ILogger _logger;
     private readonly ICluster _cluster;
-    private readonly CassandraClientOptions _options;
+    private readonly CassandraClientOptions _clientOptions;
+    private readonly CassandraStorageOptions _storageOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GrainStorageBase"/> class.
@@ -28,17 +30,20 @@ public abstract partial class GrainStorageBase : IGrainStorage, ILifecyclePartic
     /// <param name="name">The name.</param>
     /// <param name="logger">The logger.</param>
     /// <param name="cluster">The cluster.</param>
-    /// <param name="options">The client options.</param>
+    /// <param name="clientOptions">The client options.</param>
+    /// <param name="storageOptions">The storage options.</param>
     protected GrainStorageBase(
         string name,
         ILogger logger,
         ICluster cluster,
-        CassandraClientOptions options)
+        CassandraClientOptions clientOptions,
+        CassandraStorageOptions storageOptions)
     {
         _name = name;
         _logger = logger;
         _cluster = cluster;
-        _options = options;
+        _clientOptions = clientOptions;
+        _storageOptions = storageOptions;
     }
 
     /// <summary>
@@ -65,7 +70,7 @@ public abstract partial class GrainStorageBase : IGrainStorage, ILifecyclePartic
     public void Participate(ISiloLifecycle observer)
     {
         LogParticipate(_name);
-        observer.Subscribe($"{GetType().Name}:{_name}", ServiceLifecycleStage.ApplicationServices, Initialize);
+        observer.Subscribe($"{GetType().Name}:{_name}", _storageOptions.InitialStage, Initialize);
     }
 
     /// <inheritdoc/>
@@ -82,11 +87,11 @@ public abstract partial class GrainStorageBase : IGrainStorage, ILifecyclePartic
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     protected virtual async Task Initialize(CancellationToken cancellationToken)
     {
-        LogInitialize(_name, _options.DefaultKeyspace!);
+        LogInitialize(_name, _clientOptions.DefaultKeyspace!);
         Session = await _cluster.ConnectAsync(string.Empty);
-        Session.CreateKeyspaceIfNotExists(_options.DefaultKeyspace);
-        Session.ChangeKeyspace(_options.DefaultKeyspace);
-        LogConnect(_name, _options.DefaultKeyspace!);
+        Session.CreateKeyspaceIfNotExists(_clientOptions.DefaultKeyspace);
+        Session.ChangeKeyspace(_clientOptions.DefaultKeyspace);
+        LogConnect(_name, _clientOptions.DefaultKeyspace!);
     }
 
     /// <summary>

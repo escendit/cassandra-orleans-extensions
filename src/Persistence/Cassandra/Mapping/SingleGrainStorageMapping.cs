@@ -9,7 +9,7 @@ using Schema;
 /// <summary>
 /// Single Grain Storage Mapping.
 /// </summary>
-public class SingleGrainStorageMapping : Mappings
+internal class SingleGrainStorageMapping : Mappings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SingleGrainStorageMapping"/> class.

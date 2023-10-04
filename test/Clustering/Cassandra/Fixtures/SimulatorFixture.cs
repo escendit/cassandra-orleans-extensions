@@ -3,11 +3,13 @@
 
 namespace Escendit.Orleans.Clustering.Cassandra.Tests.Fixtures;
 
+using Escendit.Extensions.Hosting.Cassandra;
 using global::Orleans.Configuration;
+using global::Orleans.Configuration.Overrides;
 using global::Orleans.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Options;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Simulator Fixture.
@@ -20,12 +22,27 @@ public sealed class SimulatorFixture
     public SimulatorFixture()
     {
         var services = new ServiceCollection()
+            .AddLogging()
             .AddCassandraClientAsDefault(options =>
             {
                 options
                     .Endpoints.Add("localhost");
                 options.DefaultKeyspace = "test";
             })
+            .AddSingleton<IMembershipTable>(sp =>
+                new CassandraMembershipTable(
+                    "Default",
+                    sp.GetRequiredCassandraClient(),
+                    sp.GetRequiredService<ILogger<CassandraMembershipTable>>(),
+                    new CassandraClientOptions
+                    {
+                        Endpoints =
+                        {
+                            "localhost",
+                        },
+                        DefaultKeyspace = "test",
+                    },
+                    sp.GetProviderClusterOptions("Default").Value))
             .Configure<ClusterOptions>(options => options.ClusterId = "default");
 
         services

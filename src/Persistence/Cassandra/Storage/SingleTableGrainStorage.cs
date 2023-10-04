@@ -41,7 +41,7 @@ internal class SingleTableGrainStorage : GrainStorageBase
         IServiceProvider serviceProvider,
         CassandraClientOptions clientOptions,
         CassandraStorageOptions storageOptions)
-        : base(name, logger, serviceProvider.GetRequiredCassandraClient(name), clientOptions)
+        : base(name, logger, serviceProvider.GetRequiredCassandraClient(name), clientOptions, storageOptions)
     {
         _storageOptions = storageOptions;
         _mappingConfiguration = new MappingConfiguration()
@@ -147,6 +147,11 @@ internal class SingleTableGrainStorage : GrainStorageBase
 
     private async Task ClearStateInternalAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
     {
+        if (!_storageOptions.DeleteStateOnClear)
+        {
+            return;
+        }
+
         var name = GenerateStateName<T>(stateName, grainId);
         var type = GenerateTypeName<T>(stateName, grainId);
         var id = GenerateId<T>(stateName, grainId);

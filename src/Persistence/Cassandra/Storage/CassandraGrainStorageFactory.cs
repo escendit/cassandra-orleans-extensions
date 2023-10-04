@@ -11,7 +11,7 @@ using Options;
 /// <summary>
 /// Cassandra Grain Storage Factory.
 /// </summary>
-public static class CassandraGrainStorageFactory
+internal static class CassandraGrainStorageFactory
 {
     /// <summary>
     /// Create GrainStorage.
@@ -21,12 +21,12 @@ public static class CassandraGrainStorageFactory
     /// <returns>The grain storage.</returns>
     public static GrainStorageBase Create(IServiceProvider serviceProvider, string name)
     {
-        var options = serviceProvider.GetOptionsByName<CassandraStorageOptions>(name);
-        var connectionOptions = serviceProvider.GetOptionsByName<CassandraClientOptions>(name);
-        return options.Strategy switch
+        var storageOptions = serviceProvider.GetOptionsByName<CassandraStorageOptions>(name);
+        var clientOptions = serviceProvider.GetOptionsByName<CassandraClientOptions>(name);
+        return storageOptions.Strategy switch
         {
             Strategy.SingleTable => ActivatorUtilities
-                .CreateInstance<SingleTableGrainStorage>(serviceProvider, name, options, connectionOptions),
+                .CreateInstance<SingleTableGrainStorage>(serviceProvider, name, storageOptions, clientOptions),
             Strategy.TablePerGrain => throw new NotSupportedException(),
             null => throw new NotSupportedException(),
             _ => throw new ArgumentOutOfRangeException(name),

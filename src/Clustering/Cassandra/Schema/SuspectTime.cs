@@ -6,7 +6,7 @@ namespace Escendit.Orleans.Clustering.Cassandra;
 /// <summary>
 /// Suspect Time.
 /// </summary>
-public class SuspectTime
+internal class SuspectTime
 {
     /// <summary>
     /// Gets or sets the address.
