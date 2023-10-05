@@ -226,7 +226,8 @@ internal partial class SessionContextProviderBase : IDisposable
     {
         ArgumentNullException.ThrowIfNull(entry);
         ArgumentNullException.ThrowIfNull(tableVersion);
-        var silos = await Execute(ReadMany);
+        var silos = await Execute(ReadMany)
+            .ConfigureAwait(false);
 
         var currentEntry = silos.Members.FirstOrDefault(w => w.Item1.SiloAddress.ToParsableString() == entry.SiloAddress.ToParsableString());
 
@@ -333,7 +334,8 @@ internal partial class SessionContextProviderBase : IDisposable
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
     protected async Task<IList<Uri>> GetGatewayList()
     {
-        var membershipTableData = await Execute(ReadMany);
+        var membershipTableData = await Execute(ReadMany)
+            .ConfigureAwait(false);
         return membershipTableData
             .Members
             .Where(w => w.Item1.Status == SiloStatus.Active)
@@ -501,9 +503,15 @@ internal partial class SessionContextProviderBase : IDisposable
         var sqlSiloType = await siloTypeReader.ReadToEndAsync().ConfigureAwait(false);
         var sqlMembershipTable = await membershipTableReader.ReadToEndAsync().ConfigureAwait(false);
 
-        await _session!.ExecuteAsync(new SimpleStatement(sqlSuspectTimesType));
-        await _session!.ExecuteAsync(new SimpleStatement(sqlSiloType));
-        await _session!.ExecuteAsync(new SimpleStatement(sqlMembershipTable));
+        await Execute(() =>
+                _session!.ExecuteAsync(new SimpleStatement(sqlSuspectTimesType)))
+            .ConfigureAwait(false);
+        await Execute(() =>
+            _session!.ExecuteAsync(new SimpleStatement(sqlSiloType)))
+            .ConfigureAwait(false);
+        await Execute(() =>
+            _session!.ExecuteAsync(new SimpleStatement(sqlMembershipTable)))
+            .ConfigureAwait(false);
     }
 
     [LoggerMessage(
