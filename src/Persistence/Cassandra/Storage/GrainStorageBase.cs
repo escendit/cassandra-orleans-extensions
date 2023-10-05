@@ -88,7 +88,9 @@ internal abstract partial class GrainStorageBase : IGrainStorage, ILifecyclePart
     protected virtual async Task Initialize(CancellationToken cancellationToken)
     {
         LogInitialize(_name, _clientOptions.DefaultKeyspace!);
-        Session = await _cluster.ConnectAsync(string.Empty);
+        Session = await _cluster
+            .ConnectAsync(string.Empty)
+            .ConfigureAwait(false);
         Session.CreateKeyspaceIfNotExists(_clientOptions.DefaultKeyspace);
         Session.ChangeKeyspace(_clientOptions.DefaultKeyspace);
         LogConnect(_name, _clientOptions.DefaultKeyspace!);

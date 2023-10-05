@@ -60,11 +60,15 @@ internal partial class CassandraRemindersTable : IReminderTable
     /// <inheritdoc/>
     public async Task Init()
     {
-        _session = await _cluster.ConnectAsync(string.Empty);
+        _session = await _cluster
+            .ConnectAsync(string.Empty)
+            .ConfigureAwait(false);
         _session.CreateKeyspaceIfNotExists(_clientOptions.DefaultKeyspace);
         _session.ChangeKeyspace(_clientOptions.DefaultKeyspace);
-        await InitializeDatabase();
-        await InitializeStatements();
+        await InitializeDatabase()
+            .ConfigureAwait(false);
+        await InitializeStatements()
+            .ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -72,7 +76,8 @@ internal partial class CassandraRemindersTable : IReminderTable
     {
         var (type, id) = GenerateDatabaseIds(grainId);
         var resultSet = await Execute(() =>
-            _session!.ExecuteAsync(_readRowsStatement!.Bind(type, id)));
+            _session!.ExecuteAsync(_readRowsStatement!.Bind(type, id)))
+            .ConfigureAwait(false);
         if (resultSet.GetAvailableWithoutFetching() == 0)
         {
             return new ReminderTableData();
@@ -91,7 +96,8 @@ internal partial class CassandraRemindersTable : IReminderTable
         var bigEnd = Convert.ToInt64(end);
 
         var resultSet = await Execute(() =>
-            _session!.ExecuteAsync(_readRowsHashStatement!.Bind(bigBegin, bigEnd)));
+            _session!.ExecuteAsync(_readRowsHashStatement!.Bind(bigBegin, bigEnd)))
+            .ConfigureAwait(false);
         if (resultSet.GetAvailableWithoutFetching() == 0)
         {
             return new ReminderTableData();
@@ -109,7 +115,8 @@ internal partial class CassandraRemindersTable : IReminderTable
         ArgumentNullException.ThrowIfNull(reminderName);
         var (type, id) = GenerateDatabaseIds(grainId);
         var resultSet = await Execute(() =>
-            _session!.ExecuteAsync(_readRowStatement!.Bind(type, id, reminderName)));
+            _session!.ExecuteAsync(_readRowStatement!.Bind(type, id, reminderName)))
+            .ConfigureAwait(false);
         if (resultSet.GetAvailableWithoutFetching() == 0)
         {
             return new ReminderEntry();
@@ -137,7 +144,8 @@ internal partial class CassandraRemindersTable : IReminderTable
                         Convert.ToInt64(entry.GrainId.GetUniformHashCode()),
                         new DateTimeOffset(entry.StartAt),
                         entry.Period.Ticks,
-                        etag)));
+                        etag)))
+            .ConfigureAwait(false);
         return etag;
     }
 
@@ -157,14 +165,17 @@ internal partial class CassandraRemindersTable : IReminderTable
                 type,
                 id,
                 reminderName,
-                eTag)));
+                eTag)))
+            .ConfigureAwait(false);
         return resultSet.GetAvailableWithoutFetching() > 0;
     }
 
     /// <inheritdoc/>
-    public Task TestOnlyClearTable()
+    public async Task TestOnlyClearTable()
     {
-        return Execute(() => _session!.ExecuteAsync(new SimpleStatement($"""DELETE FROM "{RemindersTableName}";""")));
+        await Execute(() =>
+                _session!.ExecuteAsync(new SimpleStatement($"""DELETE FROM "{RemindersTableName}";""")))
+            .ConfigureAwait(false);
     }
 
     private static (byte[] Type, byte[] Id) GenerateDatabaseIds(GrainId grainId)
@@ -180,7 +191,8 @@ internal partial class CassandraRemindersTable : IReminderTable
     private async Task InitializeDatabase()
     {
         await Execute(() => new Table<Reminder>(_session, _mapping, RemindersTableName)
-            .CreateIfNotExistsAsync());
+            .CreateIfNotExistsAsync())
+            .ConfigureAwait(false);
     }
 
     private async Task InitializeStatements()
@@ -192,7 +204,8 @@ internal partial class CassandraRemindersTable : IReminderTable
                 FROM "{RemindersTableName}"
                 WHERE type = ? AND id = ?
                 ALLOW FILTERING
-                """));
+                """))
+            .ConfigureAwait(false);
         _readRowsHashStatement = await Execute(() =>
             _session!.PrepareAsync(
                 $"""
@@ -200,20 +213,23 @@ internal partial class CassandraRemindersTable : IReminderTable
                 FROM "{RemindersTableName}"
                 WHERE hash > ? AND hash <= ?
                 ALLOW FILTERING
-                """));
+                """))
+            .ConfigureAwait(false);
         _readRowStatement = await Execute(() =>
             _session!.PrepareAsync(
                 $"""
                 SELECT type, id, name, start_on, period, etag
                 FROM "{RemindersTableName}"
                 WHERE type = ? AND id = ? AND name = ?
-                """));
+                """))
+            .ConfigureAwait(false);
         _upsertRowStatement = await Execute(() =>
             _session!.PrepareAsync(
                 $"""
                 INSERT INTO "{RemindersTableName}" (type, id, name, hash, start_on, period, etag)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-                """));
+                """))
+            .ConfigureAwait(false);
     }
 
     /// <summary>
