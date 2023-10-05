@@ -85,7 +85,9 @@ internal class SingleTableGrainStorage : GrainStorageBase
 
         var storage =
             new Table<SingleGrainStorageTable>(Session, _mappingConfiguration, _storageOptions.TableNameOrPrefix);
-        await Execute(() => storage.CreateIfNotExistsAsync());
+        await Execute(() =>
+                storage.CreateIfNotExistsAsync())
+            .ConfigureAwait(false);
 
         _readStatement =
             await Execute(
@@ -94,21 +96,24 @@ internal class SingleTableGrainStorage : GrainStorageBase
                      SELECT name, type, id, state, etag
                      FROM "{_storageOptions.TableNameOrPrefix}"
                      WHERE name = ? AND type = ? AND id = ?
-                     """));
+                     """))
+                .ConfigureAwait(false);
         _writeStatement =
             await Execute(
                 () => Session!.PrepareAsync(
                     $"""
                      INSERT INTO "{_storageOptions.TableNameOrPrefix}" (name, type, id, state, etag)
                      VALUES (?, ?, ?, ?, ?)
-                     """));
+                     """))
+                .ConfigureAwait(false);
         _clearStatement =
             await Execute(
                 () => Session!.PrepareAsync(
                     $"""
                      DELETE FROM "{_storageOptions.TableNameOrPrefix}"
                      WHERE name = ? AND type = ? AND id = ?
-                     """));
+                     """))
+                .ConfigureAwait(false);
     }
 
     private async Task ReadStateInternalAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
@@ -117,7 +122,8 @@ internal class SingleTableGrainStorage : GrainStorageBase
         var type = GenerateTypeName<T>(stateName, grainId);
         var id = GenerateId<T>(stateName, grainId);
         var results = await Execute(() =>
-            Session!.ExecuteAsync(_readStatement!.Bind(name, type, id)));
+            Session!.ExecuteAsync(_readStatement!.Bind(name, type, id)))
+            .ConfigureAwait(false);
 
         if (results.GetAvailableWithoutFetching() == 0)
         {
@@ -142,7 +148,8 @@ internal class SingleTableGrainStorage : GrainStorageBase
         var state = _storageOptions.GrainStorageSerializer!.Serialize(grainState.State).ToArray();
         var etag = grainState.ETag;
         await Execute(() =>
-            Session!.ExecuteAsync(_writeStatement!.Bind(name, type, id, state, etag)));
+            Session!.ExecuteAsync(_writeStatement!.Bind(name, type, id, state, etag)))
+            .ConfigureAwait(false);
     }
 
     private async Task ClearStateInternalAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
@@ -156,7 +163,8 @@ internal class SingleTableGrainStorage : GrainStorageBase
         var type = GenerateTypeName<T>(stateName, grainId);
         var id = GenerateId<T>(stateName, grainId);
         var results = await Execute(() =>
-            Session!.ExecuteAsync(_clearStatement!.Bind(name, type, id)));
+            Session!.ExecuteAsync(_clearStatement!.Bind(name, type, id)))
+            .ConfigureAwait(false);
 
         if (results.GetAvailableWithoutFetching() != 0)
         {
