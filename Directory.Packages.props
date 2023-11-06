@@ -28,7 +28,7 @@
         <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="7.2.1"/>
         <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1"/>
         <PackageVersion Include="NSubstitute" Version="5.1.0"/>
-        <PackageVersion Include="xunit" Version="2.5.1"/>
+        <PackageVersion Include="xunit" Version="2.6.1"/>
         <PackageVersion Include="xunit.categories" Version="2.0.8"/>
         <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.1"/>
     </ItemGroup>
